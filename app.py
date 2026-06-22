@@ -43,7 +43,6 @@ def risk_category(prob):
 
 if uploaded_file is not None:
 
-```
   # Read CSV
   data = pd.read_csv(uploaded_file)
 
