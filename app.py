@@ -2,8 +2,6 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# Page Title
-
 st.title("📊 Customer Churn Analytics Platform")
 
 st.markdown("""
@@ -18,50 +16,48 @@ Predict customer churn risk using machine learning.
 * Download Predictions
   """)
 
-# Load Model
+# Load model
 
 model = joblib.load("churn_model.pkl")
 
-# Upload CSV
+# Upload file
 
 uploaded_file = st.file_uploader(
 "Upload CSV File",
 type=["csv"]
 )
 
-# Risk Category Function
+# Risk category function
 
 def risk_category(prob):
-  if prob >= 70:
-    return "High"
-  elif prob >= 40:
-    return "Medium"
-  else:
-    return "Low"
+if prob >= 70:
+return "High"
+elif prob >= 40:
+return "Medium"
+else:
+return "Low"
 
-# Main App
+# Run only after file upload
 
 if uploaded_file is not None:
 
 ```
-# Read uploaded file
 data = pd.read_csv(uploaded_file)
 
-# Predictions
 predictions = model.predict(data)
 probabilities = model.predict_proba(data)
 
-# Add prediction columns
 data["Churn_Probability"] = probabilities[:, 1] * 100
+
 data["Risk_Level"] = data["Churn_Probability"].apply(risk_category)
 
 data["Predicted_Churn"] = predictions
+
 data["Predicted_Churn"] = data["Predicted_Churn"].map({
     0: "No",
     1: "Yes"
 })
 
-# Dashboard Metrics
 total_customers = len(data)
 high_risk = len(data[data["Risk_Level"] == "High"])
 medium_risk = len(data[data["Risk_Level"] == "Medium"])
@@ -69,19 +65,24 @@ low_risk = len(data[data["Risk_Level"] == "Low"])
 
 col1, col2, col3, col4 = st.columns(4)
 
-col1.metric("Customers", total_customers)
-col2.metric("High Risk", high_risk)
-col3.metric("Medium Risk", medium_risk)
-col4.metric("Low Risk", low_risk)
+with col1:
+    st.metric("Customers", total_customers)
 
-# Risk Chart
+with col2:
+    st.metric("High Risk", high_risk)
+
+with col3:
+    st.metric("Medium Risk", medium_risk)
+
+with col4:
+    st.metric("Low Risk", low_risk)
+
 st.subheader("Risk Distribution")
 
 risk_counts = data["Risk_Level"].value_counts()
 
 st.bar_chart(risk_counts)
 
-# Download Button
 st.download_button(
     label="📥 Download Predictions",
     data=data.to_csv(index=False),
@@ -89,8 +90,7 @@ st.download_button(
     mime="text/csv"
 )
 
-# Results Table
 st.subheader("Prediction Results")
 
-st.write(data)
+st.dataframe(data)
 ```
