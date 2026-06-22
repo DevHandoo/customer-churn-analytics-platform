@@ -8,89 +8,78 @@ st.markdown("""
 Predict customer churn risk using machine learning.
 
 ### Features
-
-* Churn Prediction
-* Risk Scoring
-* Customer Segmentation
-* Business Analytics Dashboard
-* Download Predictions
-  """)
-
-# Load model
+- Churn Prediction
+- Risk Scoring
+- Customer Segmentation
+- Business Analytics Dashboard
+- Download Predictions
+""")
 
 model = joblib.load("churn_model.pkl")
 
-# Upload file
-
 uploaded_file = st.file_uploader(
-"Upload CSV File",
-type=["csv"]
+    "Upload CSV File",
+    type=["csv"]
 )
 
-# Risk category function
-
 def risk_category(prob):
-if prob >= 70:
-return "High"
-elif prob >= 40:
-return "Medium"
-else:
-return "Low"
-
-# Run only after file upload
+    if prob >= 70:
+        return "High"
+    elif prob >= 40:
+        return "Medium"
+    else:
+        return "Low"
 
 if uploaded_file is not None:
 
-```
-data = pd.read_csv(uploaded_file)
+    data = pd.read_csv(uploaded_file)
 
-predictions = model.predict(data)
-probabilities = model.predict_proba(data)
+    predictions = model.predict(data)
+    probabilities = model.predict_proba(data)
 
-data["Churn_Probability"] = probabilities[:, 1] * 100
+    data["Churn_Probability"] = probabilities[:, 1] * 100
+    data["Risk_Level"] = data["Churn_Probability"].apply(risk_category)
 
-data["Risk_Level"] = data["Churn_Probability"].apply(risk_category)
+    data["Predicted_Churn"] = predictions
+    data["Predicted_Churn"] = data["Predicted_Churn"].map({
+        0: "No",
+        1: "Yes"
+    })
 
-data["Predicted_Churn"] = predictions
+    total_customers = len(data)
+    high_risk = len(data[data["Risk_Level"] == "High"])
+    medium_risk = len(data[data["Risk_Level"] == "Medium"])
+    low_risk = len(data[data["Risk_Level"] == "Low"])
 
-data["Predicted_Churn"] = data["Predicted_Churn"].map({
-    0: "No",
-    1: "Yes"
-})
+    col1, col2, col3, col4 = st.columns(4)
 
-total_customers = len(data)
-high_risk = len(data[data["Risk_Level"] == "High"])
-medium_risk = len(data[data["Risk_Level"] == "Medium"])
-low_risk = len(data[data["Risk_Level"] == "Low"])
+    col1.metric("Customers", total_customers)
+    col2.metric("High Risk", high_risk)
+    col3.metric("Medium Risk", medium_risk)
+    col4.metric("Low Risk", low_risk)
 
-col1, col2, col3, col4 = st.columns(4)
+    st.subheader("Risk Distribution")
 
-with col1:
-    st.metric("Customers", total_customers)
+    risk_counts = data["Risk_Level"].value_counts()
 
-with col2:
-    st.metric("High Risk", high_risk)
+    st.bar_chart(risk_counts)
 
-with col3:
-    st.metric("Medium Risk", medium_risk)
+    st.download_button(
+        label="📥 Download Predictions",
+        data=data.to_csv(index=False),
+        file_name="churn_predictions.csv",
+        mime="text/csv"
+    )
 
-with col4:
-    st.metric("Low Risk", low_risk)
+    st.subheader("Prediction Results")
 
-st.subheader("Risk Distribution")
+    st.dataframe(data)
+:::
 
-risk_counts = data["Risk_Level"].value_counts()
+### Before committing
 
-st.bar_chart(risk_counts)
+Look at the code and verify:
 
-st.download_button(
-    label="📥 Download Predictions",
-    data=data.to_csv(index=False),
-    file_name="churn_predictions.csv",
-    mime="text/csv"
-)
+- There are **NO** lines containing:
 
-st.subheader("Prediction Results")
-
-st.dataframe(data)
-```
+```text id="p5ukm6"
