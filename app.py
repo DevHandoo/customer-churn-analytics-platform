@@ -32,12 +32,12 @@ type=["csv"]
 # Risk Category Function
 
 def risk_category(prob):
-if prob >= 70:
-return "High"
-elif prob >= 40:
-return "Medium"
-else:
-return "Low"
+  if prob >= 70:
+    return "High"
+  elif prob >= 40:
+    return "Medium"
+  else:
+    return "Low"
 
 # Main App
 
